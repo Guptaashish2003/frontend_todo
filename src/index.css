@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background: #FBFDFC;
+
+}
+
+.pie {
+    flex: 1 0 225px;
+    max-width: 325px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    /* border: 1px solid; */
+  
+    background-image: conic-gradient(
+      from 30deg,
+      var(--c1) 40%,
+      var(--c2) 0 65%,
+      var(--c3) 0 85%,
+      var(--c4) 0
+    );
+  }
+  
+  .donut {
+    background-image: radial-gradient(white 40%, transparent 0 70%, white 0),
+      conic-gradient(
+        from 30deg,
+        var(--c1) 40%,
+        var(--c2) 0 65%,
+        var(--c3) 0 85%,
+        var(--c4) 0
+      );
+  }
