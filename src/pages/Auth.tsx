@@ -53,7 +53,6 @@ export default function Auth() {
       const users = localStorage.getItem("users");
       if (users) {
         const parsedUsers = JSON.parse(users);
-        console.log("users...",parsedUsers)
         const user = parsedUsers.find((user: { email: string; password: string }) => user.email === data.email && user.password === data.password)
         if(user){
           user.authenticated = true

@@ -39,6 +39,7 @@ const Todo = () => {
   const [dueDate, setDueDate] = useState<Date | null>(new Date());
   const userId = useSelector((state: RootState) => state.user.userId);
   const [userTodos, setUserTodos] = useState<any>([]);
+  console.log(notes)
   let completedTask:boolean = true
   const handleNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNotes(e.target.value);
@@ -69,8 +70,7 @@ const Todo = () => {
       setUserTodos(todos.filter((todo: any) => todo.userId === userId));
     }
   }, [todos, userId]);
-  console.log("userTodos.....", userTodos);
-  console.log("reminder.....", todos);
+
   const handleAddTodo = () => {
     const newTodo = {
       userId: userId,
@@ -209,7 +209,6 @@ export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSel
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const handleCheckBox = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCompleted(e.target.checked);
-    console.log(e.target.checked,".................")
     const updatedTodo: Todo = {
       ...userTodos,
       userId: userTodos?.userId || 0,
@@ -255,7 +254,6 @@ export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSel
     }
     setTodoMenu && setTodoMenu(!todoMenu);
   }
-  console.log(isCompleted);
   return (
     <div
       
@@ -323,7 +321,6 @@ interface TodoMenuProps {
 }
 
 export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo }: TodoMenuProps) => {
-  console.log("selectTodo",selectTodo)
   const dispatch = useDispatch<AppDispatch>();
   const handleDelete = () => {
     if (selectTodo) {

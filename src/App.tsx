@@ -12,9 +12,7 @@ const App = () => {
 
   const [isOpenSideBar, setIsOpenSideBar] = useState<boolean>(true);
   const userName = localStorage.getItem("users") ? JSON.parse(localStorage.getItem("users")!)[0].name : "User";
-  console.log(userName)
   // in phonescreen size sidebar should be closed by default
-  console.log("isAuthenticated......",isAuthenticated)
   useEffect(() => {
     if(!isAuthenticated.authenticated && !localStorage.getItem("isAuthenticated")){
       navigate("/")
@@ -23,8 +21,7 @@ const App = () => {
       setIsOpenSideBar(false)
     }
   },[])
-  console.log("darkMode",darkMode)
-  
+
 
   // window.addEventListener("resize", () => {
   //   if(window.innerWidth < 768){
