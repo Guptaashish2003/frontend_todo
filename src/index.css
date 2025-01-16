@@ -33,3 +33,15 @@ body {
         var(--c4) 0
       );
   }
+
+
+  .light-mode {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  /* Dark Mode */
+  .dark-mode {
+    background-color: #000000;
+    color: #ffffff;
+  }

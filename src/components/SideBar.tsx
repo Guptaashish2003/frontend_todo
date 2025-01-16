@@ -1,5 +1,7 @@
 import { ClipboardList, Calendar, Star, Plus,Info } from "lucide-react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 const userTask = [
   {
@@ -55,11 +57,17 @@ interface SideBarProps {
 }
 
 const SideBar = ({ userName }: SideBarProps) => {
+  const todos = useSelector((state: RootState) => state.todos.todos);
+  const totalTask = todos.length;
+  const completedTask = todos.filter((todo) => todo.isCompleted).length;
+  const completedTaskPercentage = (completedTask / totalTask) * 100;
+  const inCompletedTaskPercentage = 100-completedTaskPercentage
+  console.log(completedTask,completedTaskPercentage,inCompletedTaskPercentage )
 
   const [selectedDiv, setSelectedDiv] = useState<number | null>(null);
   const data = [
-    { label: 'Pending', value: 25, color: "#3F9142" },
-    { label: 'Done', value: 75, color: "#142E15" },
+    { label: 'Pending', value: completedTaskPercentage, color: "#3F9142" },
+    { label: 'Done', value: inCompletedTaskPercentage, color: "#142E15" },
   ];
 
   return (
@@ -98,7 +106,7 @@ const SideBar = ({ userName }: SideBarProps) => {
           <div className="flex justify-between py-4 w-full">
             <span>
             <p> Today Tasks</p>
-            <p>11</p>
+            <p>{totalTask}</p>
             </span>
             <Info width={20} height={20} color="#BDBDBD" className="cursor-pointer mt-2" />
           </div>

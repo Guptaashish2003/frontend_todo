@@ -11,3 +11,7 @@ export const NightModeTypes = {
     NIGHT_MODE: "NIGHT_MODE",
     DAY_MODE: "DAY_MODE"
 }
+
+export const ActionsUserTypes = {
+    loginUser: "loginUser",
+}

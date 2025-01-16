@@ -24,6 +24,10 @@ function* handleSaveTodos(): Generator<any, void, ReturnType<typeof selectTodos>
 
 // Watcher Sagas
 export function* watchTodoActions() {
-  yield takeEvery(loadTodosFromStorage.type, handleLoadTodos);
-  yield takeEvery([addTodo.type, deleteTodo.type, updateTodo.type, toggleComplete.type], handleSaveTodos);
+  yield takeEvery("ADD_TODO", handleLoadTodos);
+  yield takeEvery([addTodo, deleteTodo, updateTodo, toggleComplete], handleSaveTodos);
+}
+
+export function* test(){
+  console.log('test')
 }

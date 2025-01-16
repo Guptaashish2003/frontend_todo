@@ -1,26 +1,61 @@
 import triangle from "../assets/triangle.svg";
 import cycle from "../assets/cycle.svg";
-import { Bell, Calendar, Plus, Star,X } from "lucide-react";
+import { Bell, Calendar, Plus, Star, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import deleteIcon from "../assets/deleteIcon.svg"
-import { Calender } from "./Calendar";
-import { addTodo } from "../redux/reducers/todoReducer";
+import deleteIcon from "../assets/deleteIcon.svg";
+import { addTodo, deleteTodo, updateTodo } from "../redux/reducers/todoReducer";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch,RootState } from "../store";
-const [isImportant, setIsImportant] = useState<boolean>(false);
-const [isCompleted, setIsCompleted] = useState<boolean>(false);
+import type { AppDispatch, RootState } from "../store";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { toast, ToastContainer } from "react-toastify";
+import { formatDate } from "../lib/utils";
+
+export  interface Todo {
+  userId:Number;
+  id:number;
+  title:string;
+  isCompleted?:boolean;
+  isImportant?:boolean;
+  createdAt?:string;
+  dueDate?:string;
+  reminderDate?:string;
+  Repeat?:boolean;
+  notes?:string;
+}
 
 const Todo = () => {
   const todos = useSelector((state: RootState) => state.todos.todos);
   const dispatch = useDispatch<AppDispatch>();
-  
-
+  const [Title, setTitle] = useState<string>("");
   const [viewListItem, setViewListItem] = useState<boolean>(false);
   const [todoMenu, setTodoMenu] = useState<boolean>(false);
-  const [isDueDate,setIsDueDate] = useState<boolean>(false)
-  const [isRepeat,setIsRepeat] = useState<boolean>(false)
-    const [isReminder,setIsReminder] = useState<boolean>(false)
-  const [setTitle, setSetTitle] = useState<string>("");
+  const [isDueDate, setIsDueDate] = useState<boolean>(false);
+  const [isRepeat, setIsRepeat] = useState<boolean>(false);
+  const [selectTodo, setSelectTodo]= useState<Todo | null>(null);
+  const [isReminder, setIsReminder] = useState<boolean>(false);
+  const [notes, setNotes] = useState<string>("");
+  const [reminderDate, setReminderDate] = useState<Date | null>(new Date());
+  const [dueDate, setDueDate] = useState<Date | null>(new Date());
+  const userId = useSelector((state: RootState) => state.user.userId);
+  const [userTodos, setUserTodos] = useState<any>([]);
+  let completedTask:boolean = true
+  const handleNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNotes(e.target.value);
+  };
+ 
+  const handleTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
+
+  const handleDateSelection = (date: Date | null) => {
+    setReminderDate(date);
+    setIsReminder(false); // Close the calendar after selecting a date
+  };
+  const handleDueDateSelection = (date: Date | null) => {
+    setDueDate(date);
+    setIsDueDate(false); // Close the calendar after selecting a date
+  }
 
   // Set the state from localStorage on mount
   useEffect(() => {
@@ -30,27 +65,32 @@ const Todo = () => {
     }
   }, []);
   useEffect(() => {
-    
-  });
+    if(todos){
+      setUserTodos(todos.filter((todo: any) => todo.userId === userId));
+    }
+  }, [todos, userId]);
+  console.log("userTodos.....", userTodos);
+  console.log("reminder.....", todos);
   const handleAddTodo = () => {
     const newTodo = {
+      userId: userId,
       id: Date.now(),
-      title: setTitle,
-      isCompleted: isCompleted,
-      isImportant: isImportant,
+      title: Title,
+      isCompleted: false,
+      isImportant: false,
       createdAt: new Date().toISOString(),
-      dueDate: '',
-      Repeat: isRepeat,
-      notes: '',
+      dueDate: dueDate?.toISOString() || "",
+      reminderDate: reminderDate?.toISOString() || "",
+      Repeat: false,
+      notes: "",
     };
     dispatch(addTodo(newTodo));
+    setTitle("");
+    setDueDate(new Date());
+    setReminderDate(new Date());
+    setIsRepeat(false);
+    toast.success("Todo added successfully");
   };
-  console.log("todos,", todos);
-
-    
-
-
-  console.log("viewListItem", viewListItem);
   return (
     <div className="flex w-full  pl-6">
       <div className="w-full p-2 mr-10 text-[#142E159E]">
@@ -67,19 +107,64 @@ const Todo = () => {
         >
           <div className="flex flex-col  justify-evenly h-full">
             <input
-              onChange={(e) => setSetTitle(e.target.value)}
+              onChange={handleTitle}
               type="text"
+              value={Title}
+              required
               placeholder="Add a Task"
               className="appearance-none border-none my-auto h-12 outline-none bg-transparent p-0 m-0 focus:ring-0 w-1/3 "
             />
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center relative">
               <div className="flex gap-2 mt-2 gap-x-6 p-2 pb-4">
-                <Bell onClick={()=>setIsDueDate(!isDueDate)} className="size-6 cursor-pointer" />
-                <img onClick={()=>setIsRepeat(!isRepeat)} className="size-6 cursor-pointer" src={cycle} alt="icon" />
-                <Calendar onClick={()=>setIsReminder(isReminder)  } className="size-6 cursor-pointer hover:bg-gray-100 hover:rounded-full  focus-within:bg-gray-100" />
-                    {isDueDate && <Calender />}
+                <Bell
+                  onClick={() => setIsDueDate(!isDueDate)}
+                  className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
+                    isDueDate ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
+                  }`}
+                />
+                {isDueDate && (
+                  <div
+                    className="absolute z-50 bg-white shadow-lg border rounded-md p-2"
+                    style={{ top: "50px", left: "-40px" }}
+                  >
+                    <DatePicker
+                      selected={reminderDate}
+                      onChange={handleDueDateSelection}
+                      inline
+                    />
+                  </div>
+                )}
+                <img
+                  onClick={() => setIsRepeat(!isRepeat)}
+                  className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
+                    isRepeat ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
+                  }`}
+                  src={cycle}
+                  alt="icon"
+                />
+                <Calendar
+                  onClick={()=>setIsReminder((prev) => !prev)}
+                  className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
+                    isReminder ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
+                  }`}
+                />
+                {isReminder && (
+                  <div
+                    className="absolute z-50 bg-white shadow-lg border rounded-md p-2"
+                    style={{ top: "50px", left: "40px" }}
+                  >
+                    <DatePicker
+                      selected={reminderDate}
+                      onChange={handleDateSelection}
+                      inline
+                    />
+                  </div>
+                )}
               </div>
-              <button onClick={handleAddTodo} className="text-[#357937] bg-[#35793729] h-8 px-4  w-24 rounded-md  text-center  mx-2  ">
+              <button
+                onClick={handleAddTodo}
+                className="text-[#357937] bg-[#35793729] h-8 px-4  w-24 rounded-md  text-center  mx-2  "
+              >
                 Add Task
               </button>
             </div>
@@ -91,13 +176,21 @@ const Todo = () => {
               viewListItem ? "grid-cols-3 max-sm:grid-cols-2" : "grid-cols-1"
             } `}
           >
-            <TodoCard setTodoMenu={setTodoMenu} todoMenu={todoMenu} />
+            {userTodos.map((todo: Todo, index: number) => (
+              <TodoCard key={index} setTodoMenu={setTodoMenu} setSelectTodo={setSelectTodo} todoMenu={todoMenu} userTodos={todo} />
+
+            ))}
           </div>
           <p className="text-lg font-medium text-gray-800 my-4">completed</p>
-          <TodoCard />
+          {
+            userTodos.map((todo: Todo, index: number) => (
+              todo.isCompleted &&<TodoCard key={index} completedTask={completedTask}  userTodos={todo} /> 
+            ))
+          }
         </div>
       </div>
-      {todoMenu && <TodoMenu />}
+      {todoMenu && <TodoMenu handleNotes={handleNotes} setTodoMenu={setTodoMenu} selectTodo={selectTodo} todoMenu={todoMenu} />}
+      <ToastContainer/>
     </div>
   );
 };
@@ -106,51 +199,102 @@ export default Todo;
 interface TodoCardProps {
   setTodoMenu?: React.Dispatch<React.SetStateAction<boolean>>;
   todoMenu?: boolean;
+  userTodos?: Todo | null;
+  completedTask?:boolean;
+  setSelectTodo?: React.Dispatch<React.SetStateAction<Todo | null>>;
 }
-export const TodoCard = ({ setTodoMenu, todoMenu }: TodoCardProps) => {
-
+export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSelectTodo}: TodoCardProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const [isImportant, setIsImportant] = useState<boolean>(false);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const handleCheckBox = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsCompleted(e.target.checked);
+    console.log(e.target.checked,".................")
+    const updatedTodo: Todo = {
+      ...userTodos,
+      userId: userTodos?.userId || 0,
+      id: userTodos?.id || Date.now(),
+      title: userTodos?.title || "",
+      isCompleted: e.target.checked,
+      isImportant: userTodos?.isImportant || false,
+      createdAt: userTodos?.createdAt || "",
+      dueDate: userTodos?.dueDate || "",
+      reminderDate: userTodos?.reminderDate || "",
+      Repeat: userTodos?.Repeat || false,
+      notes: userTodos?.notes || "",
+    };
+    // Dispatch the updated todo to the Redux store
+    dispatch(updateTodo(updatedTodo));
+    if(e.target.checked){
+      toast.success("Todo completed successfully");
+    }
+    else{
+      toast.success("Todo uncompleted ");
+    }
   };
+  const handleImportant = () => {
+    setIsImportant((prev) => !prev);
+    const updatedTodo: Todo = {
+      userId: userTodos?.userId || 0,
+      id: userTodos?.id || Date.now(),
+      title: userTodos?.title || "",
+      isCompleted: userTodos?.isCompleted || false,
+      isImportant: !isImportant,
+      createdAt: userTodos?.createdAt || "",
+      dueDate: userTodos?.dueDate || "",
+      reminderDate: userTodos?.reminderDate || "",
+      Repeat: userTodos?.Repeat || false,
+      notes: userTodos?.notes || "",
+    };
+    dispatch(updateTodo(updatedTodo));
+
+  }
+  const handleTodos = () => {
+    if (userTodos !== undefined) {
+      setSelectTodo && setSelectTodo(userTodos);
+    }
+    setTodoMenu && setTodoMenu(!todoMenu);
+  }
   console.log(isCompleted);
   return (
     <div
-      onClick={() => setTodoMenu && setTodoMenu(!todoMenu)}
+      
       className="border-b border-[#142E159E] flex gap-x-4 items-center p-2 rounded-md w-full h-16"
     >
       <input
         onChange={handleCheckBox}
-        checked={isCompleted}
+        // checked={isCompleted}
+        disabled={completedTask}
+        defaultChecked={completedTask}
         type="checkbox"
-        className="accent-[#3D8D40] w-4 h-4"
+        className="accent-[#3D8D40] cursor-pointer w-4 h-4"
       />
       <p
-        className={`text-lg text-gray-800 font-medium ${
-          isCompleted && "line-through"
+        onClick={handleTodos}
+        className={`text-lg text-gray-800 cursor-pointer font-medium ${
+          completedTask ||isCompleted  ? "line-through":""
         }`}
       >
-        TaskName
+        {userTodos && userTodos?.title}
       </p>
       <div
-        onClick={() => setIsImportant(!isImportant)}
+        onClick={handleImportant}
         className="cursor-pointer ml-auto"
       >
         {isImportant ? (
-          <Star />
-        ) : (
           <svg
-            width="22"
-            height="21"
-            viewBox="0 0 22 21"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M21.4232 8.11812C21.3294 7.82986 21.1524 7.5758 20.9145 7.38795C20.6766 7.2001 20.3885 7.08686 20.0863 7.06249L14.5551 6.61624L12.4194 1.45155C12.3039 1.17013 12.1074 0.929412 11.8547 0.759996C11.6021 0.59058 11.3047 0.500122 11.0005 0.500122C10.6963 0.500122 10.399 0.59058 10.1463 0.759996C9.89369 0.929412 9.69712 1.17013 9.58163 1.45155L7.44788 6.6153L1.91381 7.06249C1.61117 7.08809 1.3228 7.20243 1.08485 7.39118C0.8469 7.57994 0.669943 7.83472 0.576151 8.12361C0.482359 8.41249 0.475904 8.72263 0.557593 9.01516C0.639283 9.3077 0.805485 9.56962 1.03538 9.76812L5.25413 13.4084L3.96881 18.8516C3.89693 19.1473 3.91453 19.4577 4.01938 19.7434C4.12423 20.0291 4.3116 20.2771 4.55771 20.4562C4.80382 20.6352 5.09757 20.737 5.40167 20.7488C5.70576 20.7605 6.0065 20.6817 6.26569 20.5222L11.0001 17.6084L15.7373 20.5222C15.9965 20.6798 16.2967 20.7571 16.5998 20.7445C16.903 20.7318 17.1956 20.6298 17.4409 20.4512C17.6861 20.2725 17.8731 20.0254 17.9782 19.7407C18.0832 19.4561 18.1017 19.1467 18.0313 18.8516L16.7413 13.4075L20.9601 9.76718C21.1918 9.56902 21.3595 9.30652 21.442 9.01296C21.5244 8.71939 21.5179 8.40796 21.4232 8.11812Z"
-              fill="black"
-            />
-          </svg>
-        )}
+          width="22"
+          height="21"
+          viewBox="0 0 22 21"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21.4232 8.11812C21.3294 7.82986 21.1524 7.5758 20.9145 7.38795C20.6766 7.2001 20.3885 7.08686 20.0863 7.06249L14.5551 6.61624L12.4194 1.45155C12.3039 1.17013 12.1074 0.929412 11.8547 0.759996C11.6021 0.59058 11.3047 0.500122 11.0005 0.500122C10.6963 0.500122 10.399 0.59058 10.1463 0.759996C9.89369 0.929412 9.69712 1.17013 9.58163 1.45155L7.44788 6.6153L1.91381 7.06249C1.61117 7.08809 1.3228 7.20243 1.08485 7.39118C0.8469 7.57994 0.669943 7.83472 0.576151 8.12361C0.482359 8.41249 0.475904 8.72263 0.557593 9.01516C0.639283 9.3077 0.805485 9.56962 1.03538 9.76812L5.25413 13.4084L3.96881 18.8516C3.89693 19.1473 3.91453 19.4577 4.01938 19.7434C4.12423 20.0291 4.3116 20.2771 4.55771 20.4562C4.80382 20.6352 5.09757 20.737 5.40167 20.7488C5.70576 20.7605 6.0065 20.6817 6.26569 20.5222L11.0001 17.6084L15.7373 20.5222C15.9965 20.6798 16.2967 20.7571 16.5998 20.7445C16.903 20.7318 17.1956 20.6298 17.4409 20.4512C17.6861 20.2725 17.8731 20.0254 17.9782 19.7407C18.0832 19.4561 18.1017 19.1467 18.0313 18.8516L16.7413 13.4075L20.9601 9.76718C21.1918 9.56902 21.3595 9.30652 21.442 9.01296C21.5244 8.71939 21.5179 8.40796 21.4232 8.11812Z"
+            fill="black"
+          />
+        </svg>
+        ) : <Star/>}
       </div>
     </div>
   );
@@ -171,15 +315,34 @@ export const TodoMenuData = [
   },
 ];
 
-export const TodoMenu = () => {
+interface TodoMenuProps {
+  handleNotes: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setTodoMenu: React.Dispatch<React.SetStateAction<boolean>>;
+  todoMenu: boolean;
+  selectTodo: Todo | null;
+}
+
+export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo }: TodoMenuProps) => {
+  console.log("selectTodo",selectTodo)
+  const dispatch = useDispatch<AppDispatch>();
+  const handleDelete = () => {
+    if (selectTodo) {
+      dispatch(deleteTodo(selectTodo.id));
+      setTodoMenu && setTodoMenu(!todoMenu);
+      toast.error("Todo deleted successfully");
+    }
+  };
   return (
     <div className="w-3/4 h-[92vh] flex flex-col bg-[#eef6ef] p-6 px-12 mt-4   ">
       <hr className="border-t-[0.5px] mt-1 border-b-gray-500" />
-      <TodoCard />
+      <TodoCard userTodos={selectTodo} />
       <div className="flex flex-col gap-y-5 mt-4">
         {TodoMenuData.map((data, index) => (
           <>
-            <div key={index} className="flex items-center gap-2 gap-x-6 gap-y-4 p-2">
+            <div
+              key={index}
+              className="flex items-center gap-2 gap-x-6 gap-y-4 p-2"
+            >
               {data.icon}
               <p>{data.name}</p>
             </div>
@@ -190,21 +353,20 @@ export const TodoMenu = () => {
           <img src={cycle} alt="icon" />
           <p>Repeat</p>
         </div>
-          <hr className="border-b-[0.5px] mt-1 border-b-gray-500" />
+        <hr className="border-b-[0.5px] mt-1 border-b-gray-500" />
       </div>
       <input
-              type="text"
-              placeholder="Add a Notes"
-              className="appearance-none border-none  h-12 outline-none bg-transparent p-0 m-0 focus:ring-0 w-11/12 mx-auto mb-auto "
-            />
-            <hr className="border-t-[0.5px] mt-1 border-b-gray-500" />
-            <div className="mt-auto flex w-full justify-between" >
-                <X />
-                <p>Created Today</p>
-                <img className="size-6" src={deleteIcon} alt="icon" />
-
-
-            </div>
+        onChange={handleNotes}
+        type="text"
+        placeholder="Add a Notes"
+        className="appearance-none border-none  h-12 outline-none bg-transparent p-0 m-0 focus:ring-0 w-11/12 mx-auto mb-auto "
+      />
+      <hr className="border-t-[0.5px] mt-1 border-b-gray-500" />
+      <div className="mt-auto flex w-full justify-between">
+        <X className="cursor-pointer" onClick={() => setTodoMenu && setTodoMenu(!todoMenu)} />
+        <p>{ selectTodo?.createdAt ? formatDate(new Date(selectTodo.createdAt)) : "" }</p>
+        <img onClick={handleDelete} className="size-6 cursor-pointer" src={deleteIcon} alt="icon" />
+      </div>
     </div>
   );
 };

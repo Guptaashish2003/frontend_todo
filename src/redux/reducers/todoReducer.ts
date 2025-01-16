@@ -1,38 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface Todo {
-  id: number;
-  title: string;
-  isCompleted: boolean;
-  isImportant: boolean;
-  createdAt: string;
-  dueDate: string;
-  Repeat: boolean;
-  notes: string;
-}
+import {Todo} from '../../components/Todo';
 
 interface TodoState {
   todos: Todo[];
-  userId: string | null;
+  userId: number | null;
 }
 
 const initialState: TodoState = {
   todos: [],
-  userId: null,
+  userId: 0,
 };
 
 const todoSlice = createSlice({
   name: 'todos',
   initialState,
   reducers: {
-    setUserId(state, action: PayloadAction<string>) {
-      state.userId = action.payload;
-    },
     addTodo(state, action: PayloadAction<Todo>) {
       state.todos.push(action.payload);
     },
     toggleComplete(state, action: PayloadAction<number>) {
       const todo = state.todos.find((t) => t.id === action.payload);
+      console.log("updatedodo",todo)
       if (todo) {
         todo.isCompleted = !todo.isCompleted;
       }
@@ -42,6 +31,7 @@ const todoSlice = createSlice({
     },
     updateTodo(state, action: PayloadAction<Todo>) {
       const index = state.todos.findIndex((t) => t.id === action.payload.id);
+      console.log("updateTodo",action.payload,"index",index)
       if (index !== -1) {
         state.todos[index] = action.payload;
       }
@@ -53,5 +43,5 @@ const todoSlice = createSlice({
   },
 });
 
-export const { setUserId, addTodo, toggleComplete, deleteTodo, updateTodo,loadTodosFromStorage } = todoSlice.actions;
+export const {addTodo, toggleComplete, deleteTodo, updateTodo,loadTodosFromStorage } = todoSlice.actions;
 export default todoSlice.reducer;

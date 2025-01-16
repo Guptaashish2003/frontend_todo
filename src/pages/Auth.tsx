@@ -3,14 +3,18 @@ import logo from "../assets/logo.svg";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 type Inputs = {
   name?: string;
   email: string;
   password: string;
+  userId?: number;
+  authenticated?: boolean;
 };
 
 export default function Auth() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
   const {
@@ -19,10 +23,12 @@ export default function Auth() {
 
     formState: { errors },
   } = useForm<Inputs>();
+  let userId;
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     // store localstorage
 
     if(localStorage.getItem("users") === null){
+      data = {...data, userId: 1,authenticated:false}
       localStorage.setItem("users", JSON.stringify([data]))
     }
     else if (localStorage.getItem("users") && !isLogin) {
@@ -33,23 +39,35 @@ export default function Auth() {
           toast.error("User already exists")
           setIsLogin(true)
         }
+        else {
+          userId = parsedUsers.length + 1
+          data = {...data, userId,authenticated:false}
+          parsedUsers.push(data)
+          localStorage.setItem("users", JSON.stringify(parsedUsers))
+          toast.success("User created successfully")
+          setIsLogin(true)
+        }
       }
     }
     else if ( localStorage.getItem("users") && isLogin) {
       const users = localStorage.getItem("users");
       if (users) {
         const parsedUsers = JSON.parse(users);
-        if(parsedUsers[0].email === data.email && parsedUsers[0].password === data.password){
-          toast.success("Login successful")
-          localStorage.setItem("isAuthenticated", "true")
-          navigate("/Home")          
+        console.log("users...",parsedUsers)
+        const user = parsedUsers.find((user: { email: string; password: string }) => user.email === data.email && user.password === data.password)
+        if(user){
+          user.authenticated = true
+          localStorage.setItem("users", JSON.stringify(parsedUsers))
+          toast.success("User logged in successfully")
+          dispatch({type:"LOGIN",payload:user})
+          navigate("/Home")
         }
-        else{
-          toast.error("Invalid credentials")
+        else {
+          toast.error("Invalid email or password")
         }
       }
-
     }
+    
     
 
   }
