@@ -30,7 +30,7 @@ const App = () => {
   // });
 
 
-
+console.log(darkMode)
   return (
     <div className="">
       <NavBar
