@@ -1,6 +1,6 @@
 import { takeEvery, put, select } from 'redux-saga/effects';
 
-import { deleteTodo, addTodo, toggleComplete, updateTodo, loadTodosFromStorage } from '../reducers/todoReducer';
+import { deleteTodo, addTodo, toggleComplete, updateTodo } from '../reducers/todoReducer';
 import { RootState } from '../../store';
 // Selector to get the current state
 const selectTodos = (state: RootState) => state.todos.todos;

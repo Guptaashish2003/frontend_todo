@@ -1,5 +1,5 @@
 import { RootState } from '../../store';
-import { takeEvery, put, select } from 'redux-saga/effects';
+import { takeEvery, put } from 'redux-saga/effects';
 
 import { toggleDarkMode,toggleListView } from '../reducers/uiReducer';
 
