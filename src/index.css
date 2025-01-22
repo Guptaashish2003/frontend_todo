@@ -2,10 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    background: #FBFDFC;
-
+:root  {
+  --background-color: #FBFDFC;
+  --text-color: black;
+  --hover-background-color: lightgreen;
+  --hover-text-color: black;
 }
+
+.dark-mode * {
+  --background-color: #242424;
+  --text-color: white;
+  --hover-background-color: green;
+  --hover-text-color: white;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.hover-bg-green:hover {
+  background-color: var(--hover-background-color);
+}
+
+.hover-text-white:hover {
+  color: var(--hover-text-color);
+}
+
+
 
 .pie {
     flex: 1 0 225px;
@@ -40,8 +64,7 @@ body {
     color: #000000;
   }
   
-  /* Dark Mode */
-  .dark-mode {
-    background-color: #000000;
-    color: #ffffff;
-  }
+
+
+
+ 

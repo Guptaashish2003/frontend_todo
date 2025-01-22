@@ -21,7 +21,7 @@ export default function Auth() {
     register,
     handleSubmit,
 
-    formState: { errors },
+    formState: {  },
   } = useForm<Inputs>();
   let userId;
   const onSubmit: SubmitHandler<Inputs> = (data) => {
@@ -73,7 +73,7 @@ export default function Auth() {
   const handleClick = () => {
     setIsLogin((prev) => !prev);
   };
-  console.log(errors)
+ 
 
   return (
     <>

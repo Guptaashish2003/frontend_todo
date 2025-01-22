@@ -17,9 +17,13 @@ const UiSlice = createSlice({
     reducers: {
       toggleDarkMode(state, action: PayloadAction<boolean>) {
         state.DarkMode = action.payload;
+        console.log('State before toggleDarkMode....:', state);
+console.log('Action payload toggleDarkMode.....:', action.payload);
       },
       toggleListView(state, action: PayloadAction<boolean>) {
         state.listView = action.payload;
+        console.log('State before toggleListview...:', state);
+console.log('Action payload togglelistvevw....:', action.payload);
       },
     },
   });

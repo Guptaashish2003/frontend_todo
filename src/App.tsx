@@ -8,7 +8,7 @@ import type { RootState } from "./store";
 const App = () => {
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state: RootState) => state.user);
-  const darkMode = useSelector((state:RootState) => state.uiInputs)
+  const {listView,DarkMode} = useSelector((state:RootState) => state.uiInputs)
 
   const [isOpenSideBar, setIsOpenSideBar] = useState<boolean>(true);
   const userName = localStorage.getItem("users") ? JSON.parse(localStorage.getItem("users")!)[0].name : "User";
@@ -28,18 +28,21 @@ const App = () => {
   //     setIsOpenSideBar(false)
   //   }
   // });
+  let className:string = DarkMode?"dark-mode":""
 
 
-console.log(darkMode)
+console.log(DarkMode,"darkMode........")
+console.log(listView,"ListView........")
   return (
-    <div className="">
+    <div className={`${className} ${DarkMode?"!bg-[#232323] text-white":"!bg-[#FBFDFC] "} `}>
       <NavBar
+        className={className}
         isOpenSideBar={isOpenSideBar}
         setIsOpenSideBar={setIsOpenSideBar}
       />
      <div className="flex">
-     {isOpenSideBar && <SideBar userName={userName} />}
-     <Todo />
+     {isOpenSideBar && <SideBar DarkMode={DarkMode} className={className} userName={userName} />}
+     <Todo className={className} DarkMode={DarkMode} listView={listView} />
      </div>
     </div>
   );

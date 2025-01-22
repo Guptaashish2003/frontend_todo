@@ -1,25 +1,24 @@
-import { RootState } from '../../store';
+
 import { takeEvery, put } from 'redux-saga/effects';
-
-import { toggleDarkMode,toggleListView } from '../reducers/uiReducer';
-
+import { toggleDarkMode, toggleListView } from '../reducers/uiReducer';
 import { type PayloadAction } from '@reduxjs/toolkit';
 
-const uiInput = (state:RootState) => state.uiInputs
-// export const toggleDarkMode = createAction<boolean>('ui/toggleDarkMode');
+// Saga to handle UI input actions
+function* handleToggleUiInput(action: PayloadAction<{ DarkMode?: boolean; listView?: boolean }>) {
+  const { payload } = action;
 
-// export const toggleListView = createAction<boolean>('ui/toggleListView');
+  // Dispatch toggle actions based on payload
+  if (payload.DarkMode !== undefined) {
+    yield put(toggleDarkMode(payload.DarkMode)); // Update DarkMode
+  }
 
-
-
-function* handleToggleUiInput (action:PayloadAction<ReturnType<typeof uiInput>>){
-    const {payload} =  action
-    yield put(toggleDarkMode(payload.DarkMode));
-    yield put(toggleListView(payload.listView));
-
+  if (payload.listView !== undefined) {
+    yield put(toggleListView(payload.listView)); // Update listView
+  }
 }
 
-export function* watchUiInputs (){
-    yield takeEvery("DARK_MODE",handleToggleUiInput)
-    yield takeEvery("LIST_VIEW",handleToggleUiInput)
+// Watcher saga for UI input actions
+export function* watchUiInputs() {
+  yield takeEvery("DARK_MODE", handleToggleUiInput); // Listen for DARK_MODE action
+  yield takeEvery("LIST_VIEW", handleToggleUiInput); // Listen for LIST_VIEW action
 }

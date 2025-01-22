@@ -1,5 +1,6 @@
 import triangle from "../assets/triangle.svg";
 import cycle from "../assets/cycle.svg";
+import whitecycle from "../assets/whitecycle.svg";
 import { Bell, Calendar, Plus, Star, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import deleteIcon from "../assets/deleteIcon.svg";
@@ -22,10 +23,18 @@ export  interface Todo {
   reminderDate?:string;
   Repeat?:boolean;
   notes?:string;
+
+}
+interface DarkModeProps {
+  className?:string
+  DarkMode?:boolean
+  listView?:boolean
 }
 
-const Todo = () => {
+const Todo = ({className,DarkMode,listView}:DarkModeProps) => {
   const todos = useSelector((state: RootState) => state.todos.todos);
+  // const {listView} = useSelector((state:RootState) => state.uiInputs)
+
   const dispatch = useDispatch<AppDispatch>();
   const [Title, setTitle] = useState<string>("");
   const [viewListItem, setViewListItem] = useState<boolean>(false);
@@ -39,7 +48,6 @@ const Todo = () => {
   const [dueDate, setDueDate] = useState<Date | null>(new Date());
   const userId = useSelector((state: RootState) => state.user.userId);
   const [userTodos, setUserTodos] = useState<any>([]);
-  console.log(notes)
   let completedTask:boolean = true
   const handleNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNotes(e.target.value);
@@ -92,7 +100,7 @@ const Todo = () => {
     toast.success("Todo added successfully");
   };
   return (
-    <div className="flex w-full  pl-6">
+    <div className={`flex w-full  pl-6 ${className}`}>
       <div className="w-full p-2 mr-10 text-[#142E159E]">
         <span className="flex gap-1 items-center">
           <p>Todo</p>
@@ -112,11 +120,12 @@ const Todo = () => {
               value={Title}
               required
               placeholder="Add a Task"
-              className="appearance-none border-none my-auto h-12 outline-none bg-transparent p-0 m-0 focus:ring-0 w-1/3 "
+              className={`appearance-none border-none my-auto h-12 outline-none bg-transparent p-0 m-0 focus:ring-0 w-1/3 ${DarkMode?"text-white":""}`}
             />
             <div className="flex justify-between items-center relative">
               <div className="flex gap-2 mt-2 gap-x-6 p-2 pb-4">
                 <Bell
+                  color={DarkMode?"white":"black"}
                   onClick={() => setIsDueDate(!isDueDate)}
                   className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
                     isDueDate ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
@@ -139,10 +148,14 @@ const Todo = () => {
                   className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
                     isRepeat ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
                   }`}
-                  src={cycle}
+                  src={DarkMode?whitecycle:cycle}
                   alt="icon"
+                  style={{
+                    filter: DarkMode ? " white(100%) " : "none",
+                  }}
                 />
                 <Calendar
+                color={DarkMode?"white":"black"}
                   onClick={()=>setIsReminder((prev) => !prev)}
                   className={`size-6 cursor-pointer hover:bg-customGreen hover:text-white hover:rounded-full hover:p-1.5 focus:bg-customGreen ${
                     isReminder ? "bg-customGreen text-white rounded-full size-8 p-1" : ""
@@ -173,23 +186,27 @@ const Todo = () => {
         <div className="flex flex-col gap-y-1">
           <div
             className={`grid  ${
-              viewListItem ? "grid-cols-3 max-sm:grid-cols-2" : "grid-cols-1"
+              listView ? "grid-cols-3 max-sm:grid-cols-2" : "grid-cols-1"
             } `}
           >
             {userTodos.map((todo: Todo, index: number) => (
-              <TodoCard key={index} setTodoMenu={setTodoMenu} setSelectTodo={setSelectTodo} todoMenu={todoMenu} userTodos={todo} />
+              <div key={index} className={` grid w-[98%] ${viewListItem ? "col-span-4  " : "col-span-1"} `}>
+                <TodoCard className={className} DarkMode={DarkMode}  setTodoMenu={setTodoMenu} setSelectTodo={setSelectTodo} todoMenu={todoMenu} userTodos={todo} />
+              </div>
 
             ))}
           </div>
-          <p className="text-lg font-medium text-gray-800 my-4">completed</p>
+          <p className={`text-lg font-medium  my-4 ${DarkMode?"text-white":"text-gray-800"}`}>completed</p>
           {
             userTodos.map((todo: Todo, index: number) => (
-              todo.isCompleted &&<TodoCard key={index} completedTask={completedTask}  userTodos={todo} /> 
+              todo.isCompleted &&<div className="grid w-[98%] col-span-1">
+                <TodoCard key={index} completedTask={completedTask}  userTodos={todo} DarkMode={DarkMode} className={className} />
+              </div> 
             ))
           }
         </div>
       </div>
-      {todoMenu && <TodoMenu handleNotes={handleNotes} setTodoMenu={setTodoMenu} selectTodo={selectTodo} todoMenu={todoMenu} />}
+      {todoMenu && <TodoMenu className={className} notes={notes} handleNotes={handleNotes} setTodoMenu={setTodoMenu} selectTodo={selectTodo} todoMenu={todoMenu} DarkMode={DarkMode}  />}
       <ToastContainer/>
     </div>
   );
@@ -202,8 +219,11 @@ interface TodoCardProps {
   userTodos?: Todo | null;
   completedTask?:boolean;
   setSelectTodo?: React.Dispatch<React.SetStateAction<Todo | null>>;
+  className?:string
+  DarkMode?:boolean
+
 }
-export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSelectTodo}: TodoCardProps) => {
+export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSelectTodo,className,DarkMode}: TodoCardProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const [isImportant, setIsImportant] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
@@ -257,7 +277,7 @@ export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSel
   return (
     <div
       
-      className="border-b border-[#142E159E] flex gap-x-4 items-center p-2 rounded-md w-full h-16"
+      className={`border-b border-[#142E159E] mx-2 flex gap-x-4 items-center p-2 rounded-md w-full h-16 ${DarkMode?"text-white":""} ${className}`}
     >
       <input
         onChange={handleCheckBox}
@@ -269,7 +289,7 @@ export const TodoCard = ({ setTodoMenu, todoMenu ,userTodos,completedTask,setSel
       />
       <p
         onClick={handleTodos}
-        className={`text-lg text-gray-800 cursor-pointer font-medium ${
+        className={`text-lg ${DarkMode?"text-white":"text-gray-800"} cursor-pointer font-medium ${
           completedTask ||isCompleted  ? "line-through":""
         }`}
       >
@@ -317,10 +337,13 @@ interface TodoMenuProps {
   handleNotes: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setTodoMenu: React.Dispatch<React.SetStateAction<boolean>>;
   todoMenu: boolean;
+  className?:string
   selectTodo: Todo | null;
+  notes?: string;
+  DarkMode?:boolean
 }
 
-export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo }: TodoMenuProps) => {
+export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo,className,DarkMode }: TodoMenuProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const handleDelete = () => {
     if (selectTodo) {
@@ -330,9 +353,9 @@ export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo }: TodoMe
     }
   };
   return (
-    <div className="w-3/4 h-[92vh] flex flex-col bg-[#eef6ef] p-6 px-12 mt-4   ">
+    <div className={`w-3/4 h-[92vh] flex flex-col  p-6 px-12 mt-4 ${DarkMode?"bg-[#2c2c2c]":"bg-[#eef6ef]"}  ${className}`}>
       <hr className="border-t-[0.5px] mt-1 border-b-gray-500" />
-      <TodoCard userTodos={selectTodo} />
+      <TodoCard className={className} DarkMode={DarkMode} userTodos={selectTodo} />
       <div className="flex flex-col gap-y-5 mt-4">
         {TodoMenuData.map((data, index) => (
           <>
@@ -347,7 +370,7 @@ export const TodoMenu = ({ handleNotes,setTodoMenu,todoMenu,selectTodo }: TodoMe
           </>
         ))}
         <div className="flex items-center gap-2 gap-x-6 gap-y-4 p-2">
-          <img src={cycle} alt="icon" />
+          <img src={DarkMode?whitecycle:cycle} alt="icon" />
           <p>Repeat</p>
         </div>
         <hr className="border-b-[0.5px] mt-1 border-b-gray-500" />
