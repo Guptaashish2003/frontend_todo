@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import './index.css'
 import App from './App.tsx'
 import store from './store.ts'
-import { BrowserRouter,Routes,Route,createBrowserRouter,RouterProvider } from 'react-router-dom'
+import {createBrowserRouter,RouterProvider } from 'react-router-dom'
 import Auth from './pages/Auth.tsx'
 
 localStorage.setItem("isAuthenticated", "false")
