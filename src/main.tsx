@@ -4,21 +4,25 @@ import { Provider } from 'react-redux'
 import './index.css'
 import App from './App.tsx'
 import store from './store.ts'
-import { BrowserRouter,Routes,Route } from 'react-router-dom'
+import { BrowserRouter,Routes,Route,createBrowserRouter,RouterProvider } from 'react-router-dom'
 import Auth from './pages/Auth.tsx'
 
 localStorage.setItem("isAuthenticated", "false")
+const router = createBrowserRouter([ 
+  {
+    path: "/",
+    element: <Auth />,
+  },
+  {
+    path: "/Home",
+    element: <App />,
+  }
+])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-
-      <BrowserRouter>
-      <Routes>
-        <Route path="/Home" element={<App />} />
-        <Route path="/" element={<Auth />} />
-      </Routes>
-      </BrowserRouter>
+    <RouterProvider router={router} />
     </Provider>
   </StrictMode>,
 )
